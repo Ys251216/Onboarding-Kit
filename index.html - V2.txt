@@ -616,10 +616,11 @@
         window.onload = () => navigateTo('home');
     </script>
 <script type="module">
+  // 1. ייבוא ספריות בגרסה אחידה (10.7.0)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-  // 1. הגדרות תקינות (נקיות מהכפילויות שהיו)
+  // 2. הגדרות Firebase נקיות (בלי ה-import שהיה בפנים בטעות)
   const firebaseConfig = {
     apiKey: "AIzaSyDHMgzo-yQ_UGkAXdBPzkJjB7uCGG9_nBs",
     authDomain: "onboarding-kit-60190.firebaseapp.com",
@@ -629,10 +630,11 @@
     appId: "1:515390708221:web:a828f2289fe2cfe9602194"
   };
 
+  // 3. אתחול
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 2. פונקציה ששומרת את כל מצב האפליקציה לענן
+  // 4. פונקציית סנכרון (שומרת את כל המערכים שלך לענן)
   async function syncToFirebase() {
     try {
       await setDoc(doc(db, "appData", "currentStatus"), {
@@ -643,26 +645,26 @@
         culture: cultureData,
         lastUpdated: new Date()
       });
-      console.log("סונכרן ל-Firebase!");
+      console.log("סונכרן ל-Firebase בהצלחה!");
     } catch (e) {
       console.error("שגיאת סנכרון:", e);
     }
   }
 
-  // 3. פונקציה שטוענת את הנתונים כשהאתר נפתח
+  // 5. פונקציית טעינה (מושכת את הכל בבת אחת כשהדף עולה)
   async function loadFromFirebase() {
     try {
       const docSnap = await getDoc(doc(db, "appData", "currentStatus"));
       if (docSnap.exists()) {
         const data = docSnap.data();
-        // עדכון המשתנים המקומיים בנתונים מהענן
+        // מעדכן את המשתנים שהגדרת ב-Script הראשון [cite: 61-66]
         if (data.checklist) checklistData = data.checklist;
         if (data.terms) termsData = data.terms;
         if (data.contacts) contactsData = data.contacts;
         if (data.links) linksData = data.links;
         if (data.culture) cultureData = data.culture;
         
-        renderAll(); // רינדור מחדש של המסך עם המידע החדש
+        renderAll(); // מרענן את התצוגה [cite: 78]
         console.log("הנתונים נטענו מהענן!");
       }
     } catch (e) {
@@ -670,31 +672,26 @@
     }
   }
 
-  // 4. חיבור הפונקציות הקיימות שלך לסנכרון אוטומטי
-  // נדרוס בעדינות את הפונקציות המקוריות כדי שיוסיפו שמירה לענן
-  const originalSaveForm = window.saveForm;
+  // 6. חיבור הפונקציות ששינית ל-Logic [שינויים בשורות 85, 144, 154]
   window.saveForm = (section) => {
-    // השתמש בלוגיקה הקיימת שכתבתי קודם (נמצאת בתוך ה-script הראשון)
-    // הערה: מכיוון ש-saveForm הוגדרה בסקריפט הקודם, נקרא לה ונוסיף שמירה
     saveFormLogic(section); 
     syncToFirebase();
   };
 
-  const originalDeleteItem = window.deleteItem;
   window.deleteItem = (section, id) => {
     deleteItemLogic(section, id);
     syncToFirebase();
   };
 
-  const originalToggleTask = window.toggleTask;
   window.toggleTask = (id) => {
     toggleTaskLogic(id);
     syncToFirebase();
   };
 
-  // הרצת טעינה ראשונית
+  // הפעלה בטעינת הדף
   window.addEventListener('load', loadFromFirebase);
 </script>
 </body>
 </html>
+
 
