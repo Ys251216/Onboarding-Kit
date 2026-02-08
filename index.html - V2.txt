@@ -355,7 +355,7 @@
             updateChart();
         }
 
-        function toggleTask(id) {
+        function toggleTaskLogic(id) {
             const t = checklistData.find(x => x.id === id);
             if (t) t.done = !t.done;
             renderChecklist();
@@ -570,7 +570,7 @@
             modal.classList.remove('hidden');
         }
 
-        function saveForm(section) {
+        function saveFormLogic(section) {
             let arr = getDataArray(section);
             let newItem = { id: editId || Date.now() };
             if (section === 'checklist') newItem.text = document.getElementById('f-text').value;
@@ -584,7 +584,7 @@
             closeModal(); renderAll();
         }
 
-        function deleteItem(section, id) {
+        function deleteItemLogic(section, id) {
             if (!confirm('למחוק רשומה זו?')) return;
             if (section === 'checklist') checklistData = checklistData.filter(x => x.id !== id);
             else if (section === 'dictionary') termsData = termsData.filter(x => x.id !== id);
@@ -616,59 +616,85 @@
         window.onload = () => navigateTo('home');
     </script>
 <script type="module">
-  // 1. ייבוא הספריות - אל תיגע בזה, זה פשוט מביא את הכלים מהאינטרנט
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-  // 2. כאן תדביק את ה-Config שהעתקת מ-Firebase (במקום מה שכתוב כאן למטה)
-  const firebaseConfig = {
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  // 1. הגדרות תקינות (נקיות מהכפילויות שהיו)
   const firebaseConfig = {
     apiKey: "AIzaSyDHMgzo-yQ_UGkAXdBPzkJjB7uCGG9_nBs",
     authDomain: "onboarding-kit-60190.firebaseapp.com",
     projectId: "onboarding-kit-60190",
     storageBucket: "onboarding-kit-60190.firebasestorage.app",
     messagingSenderId: "515390708221",
-    appId: "1:515390708221:web:a828f2289fe2cfe9602194",
-    measurementId: "G-J1PXK67117"
+    appId: "1:515390708221:web:a828f2289fe2cfe9602194"
   };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  };
-
-  // 3. חיבור המערכת
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 4. פונקציה שתשמור את מה שכתבת (נשתמש בה עוד רגע)
-  async function saveDataToFirebase() {
-    // נניח שיש לך תיבת טקסט עם id="myInput"
-    const textToSave = document.getElementById('myInput').value; 
-
+  // 2. פונקציה ששומרת את כל מצב האפליקציה לענן
+  async function syncToFirebase() {
     try {
-      // שמירה לתוך "מגירה" שקראנו לה notes, תחת השם myNote
-      await setDoc(doc(db, "notes", "myNote"), {
-        content: textToSave,
-        time: new Date()
+      await setDoc(doc(db, "appData", "currentStatus"), {
+        checklist: checklistData,
+        terms: termsData,
+        contacts: contactsData,
+        links: linksData,
+        culture: cultureData,
+        lastUpdated: new Date()
       });
-      alert("נשמר בבסיס הנתונים!");
-    } catch (error) {
-      console.error("שגיאה:", error);
+      console.log("סונכרן ל-Firebase!");
+    } catch (e) {
+      console.error("שגיאת סנכרון:", e);
     }
   }
 
-  // חובה: חשיפת הפונקציה כדי שהכפתור ב-HTML יזהה אותה
-  window.saveDataToFirebase = saveDataToFirebase;
+  // 3. פונקציה שטוענת את הנתונים כשהאתר נפתח
+  async function loadFromFirebase() {
+    try {
+      const docSnap = await getDoc(doc(db, "appData", "currentStatus"));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        // עדכון המשתנים המקומיים בנתונים מהענן
+        if (data.checklist) checklistData = data.checklist;
+        if (data.terms) termsData = data.terms;
+        if (data.contacts) contactsData = data.contacts;
+        if (data.links) linksData = data.links;
+        if (data.culture) cultureData = data.culture;
+        
+        renderAll(); // רינדור מחדש של המסך עם המידע החדש
+        console.log("הנתונים נטענו מהענן!");
+      }
+    } catch (e) {
+      console.error("שגיאה בטעינה:", e);
+    }
+  }
+
+  // 4. חיבור הפונקציות הקיימות שלך לסנכרון אוטומטי
+  // נדרוס בעדינות את הפונקציות המקוריות כדי שיוסיפו שמירה לענן
+  const originalSaveForm = window.saveForm;
+  window.saveForm = (section) => {
+    // השתמש בלוגיקה הקיימת שכתבתי קודם (נמצאת בתוך ה-script הראשון)
+    // הערה: מכיוון ש-saveForm הוגדרה בסקריפט הקודם, נקרא לה ונוסיף שמירה
+    saveFormLogic(section); 
+    syncToFirebase();
+  };
+
+  const originalDeleteItem = window.deleteItem;
+  window.deleteItem = (section, id) => {
+    deleteItemLogic(section, id);
+    syncToFirebase();
+  };
+
+  const originalToggleTask = window.toggleTask;
+  window.toggleTask = (id) => {
+    toggleTaskLogic(id);
+    syncToFirebase();
+  };
+
+  // הרצת טעינה ראשונית
+  window.addEventListener('load', loadFromFirebase);
 </script>
 </body>
-
 </html>
+
