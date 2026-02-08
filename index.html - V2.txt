@@ -7,91 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Chosen Palette: Midnight Professional - Base of Slate-950 for background, Slate-900 for cards, and vibrant Teal-500 for accents and interactive elements. -->
-    
-    <!-- Application Structure Plan: 
-         The app follows the previously designed dashboard structure but with a complete CSS overhaul for Dark Mode.
-         - Sidebar: Remains fixed, using Slate-900 to distinguish from the main content.
-         - Content Cards: Use Slate-800 with thin Slate-700 borders to maintain depth.
-         - Typography: Headings in Slate-50, body text in Slate-400 for hierarchy.
-         - Interaction: Maintained the CRUD and AI features with updated styling for inputs and modals to match the dark theme.
-    -->
-
-    <!-- Visualization & Content Choices:
-         - Progress Chart: Updated colors to Teal-500 (done) and Slate-700 (todo) for high contrast in dark mode.
-         - AI Feedback: Loading spinners and modal backgrounds adjusted to be non-obtrusive.
-    -->
-
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
+    <link rel="icon" href="data:,">
     <style>
-        body {
-            font-family: 'Heebo', sans-serif;
-            background-color: #020617; /* Slate-950 */
-            color: #94a3b8; /* Slate-400 */
-        }
-        .nav-item.active {
-            background-color: #1e293b; /* Slate-800 */
-            border-right: 4px solid #14b8a6; /* Teal-500 */
-            color: #2dd4bf; /* Teal-400 */
-            font-weight: 700;
-        }
-        .card-bg {
-            background-color: #0f172a; /* Slate-900 */
-            border: 1px solid #1e293b; /* Slate-800 */
-        }
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-2px);
-            background-color: #1e293b;
-            border-color: #334155;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin: auto;
-            height: 250px;
-        }
-        .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-        }
-        .loading-spinner {
-            border: 3px solid rgba(255,255,255,0.1);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border-left-color: #2dd4bf;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Custom scrollbar for dark mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #020617;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #334155;
-        }
+        body { font-family: 'Heebo', sans-serif; background-color: #020617; color: #94a3b8; }
+        .nav-item.active { background-color: #1e293b; border-right: 4px solid #14b8a6; color: #2dd4bf; font-weight: 700; }
+        .card-bg { background-color: #0f172a; border: 1px solid #1e293b; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); background-color: #1e293b; border-color: #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .chart-container { position: relative; width: 100%; max-width: 400px; margin: auto; height: 250px; }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+        .loading-spinner { border: 3px solid rgba(255,255,255,0.1); width: 24px; height: 24px; border-radius: 50%; border-left-color: #2dd4bf; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
-
-    <!-- Sidebar Navigation -->
     <aside class="w-64 bg-slate-900 shadow-2xl z-10 hidden md:flex flex-col border-l border-slate-800">
         <div class="p-6 border-b border-slate-800 flex items-center justify-center">
             <h1 class="text-2xl font-bold text-teal-500">🚀 נחיתה רכה</h1>
@@ -109,219 +38,79 @@
         </nav>
     </aside>
 
-    <!-- Main Content Area -->
     <main class="flex-1 overflow-y-auto p-4 md:p-8 transition-all relative">
-        
-        <!-- HOME -->
         <section id="home" class="space-y-8 max-w-4xl mx-auto">
             <div class="bg-gradient-to-l from-teal-700 to-teal-950 text-white rounded-2xl p-8 shadow-2xl border border-teal-800/50">
                 <h2 class="text-3xl font-bold mb-4">ברוכים הבאים לצוות! 👋</h2>
-                <p class="text-teal-100 text-lg leading-relaxed">
-                    כאן תוכלו למצוא הכל. מהמונחים המקצועיים ועד מי עוזר כשהמקלדת נשברת. <br>
-                    <span class="text-teal-400 font-bold">הכל במצב כהה חדש ונוח לעיניים.</span>
-                </p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card-bg p-6 rounded-xl shadow-sm card-hover cursor-pointer" onclick="navigateTo('checklist')">
-                    <h3 class="text-xl font-bold text-slate-100 mb-2">✅ ניהול משימות</h3>
-                    <p class="text-slate-400">עקוב אחר ההתקדמות והשתמש ב-AI ליצירת משימות מותאמות אישית.</p>
-                </div>
-                <div class="card-bg p-6 rounded-xl shadow-sm card-hover cursor-pointer" onclick="navigateTo('ai-chat')">
-                    <h3 class="text-xl font-bold text-slate-100 mb-2">✨ שאל את הצוות הווירטואלי</h3>
-                    <p class="text-slate-400">יש לך שאלה? ה-AI שלנו מכיר את הארגון וישמח לעזור.</p>
-                </div>
+                <p class="text-teal-100 text-lg leading-relaxed">כאן תוכלו למצוא הכל. מהמונחים המקצועיים ועד מי עוזר כשהמקלדת נשברת.</p>
             </div>
         </section>
 
-        <!-- CHECKLIST -->
         <section id="checklist" class="hidden space-y-6 max-w-5xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h2 class="text-3xl font-bold text-slate-50">צ'ק-ליסט לשבוע הראשון</h2>
-                    <p class="text-slate-400">נהלו את המשימות שלכם או צרו חדשות בעזרת AI.</p>
-                </div>
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-slate-50">צ'ק-ליסט</h2>
                 <div class="flex gap-2">
-                    <button onclick="openForm('checklist')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-500 transition-colors text-sm">➕ הוספה ידנית</button>
-                    <button onclick="openAiTaskModal()" class="bg-slate-800 text-teal-400 border border-teal-900/50 px-4 py-2 rounded-lg font-bold hover:bg-slate-700 transition-colors text-sm flex items-center gap-2">✨ צור משימות AI</button>
+                    <button onclick="openForm('checklist')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold">➕ הוספה</button>
+                    <button onclick="openAiTaskModal()" class="bg-slate-800 text-teal-400 px-4 py-2 rounded-lg font-bold">✨ AI</button>
                 </div>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 space-y-4" id="task-list-container"></div>
-                <div class="card-bg p-6 rounded-xl shadow-sm flex flex-col items-center">
-                    <h3 class="text-lg font-semibold mb-4 text-slate-200">סטטוס התקדמות</h3>
-                    <div class="chart-container">
-                        <canvas id="progressChart"></canvas>
-                    </div>
-                    <p id="progress-text" class="mt-4 font-bold text-teal-400 text-2xl">0%</p>
-                </div>
+            <div id="task-list-container" class="space-y-4"></div>
+            <div class="card-bg p-6 rounded-xl text-center">
+                <h3 class="text-lg font-semibold mb-4 text-slate-200">התקדמות</h3>
+                <div class="chart-container"><canvas id="progressChart"></canvas></div>
+                <p id="progress-text" class="mt-4 font-bold text-teal-400 text-2xl">0%</p>
             </div>
         </section>
 
-        <!-- DICTIONARY -->
         <section id="dictionary" class="hidden space-y-6 max-w-5xl mx-auto">
             <div class="flex justify-between items-center">
                 <h2 class="text-3xl font-bold text-slate-50">מילון מונחים</h2>
-                <button onclick="openForm('dictionary')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-500 transition-colors">➕ הוספת מונח</button>
+                <button onclick="openForm('dictionary')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold">➕ הוספה</button>
             </div>
-            <input type="text" id="search-term" placeholder="חיפוש מונח..." class="w-full p-4 rounded-full bg-slate-900 border border-slate-700 text-slate-100 shadow-sm focus:ring-2 focus:ring-teal-500 outline-none" oninput="renderDictionary()">
+            <input type="text" id="search-term" placeholder="חיפוש..." class="w-full p-4 rounded-full bg-slate-900 border border-slate-700 text-slate-100 outline-none" oninput="renderDictionary()">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="terms-grid"></div>
         </section>
 
-        <!-- CONTACTS -->
         <section id="contacts" class="hidden space-y-6 max-w-6xl mx-auto">
             <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-bold text-slate-50">מי נגד מי? אנשי קשר</h2>
-                <button onclick="openForm('contacts')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-500 transition-colors">➕ הוספת איש קשר</button>
-            </div>
-            <div class="flex border-b border-slate-800 mb-6">
-                <button class="px-6 py-3 text-teal-400 border-b-2 border-teal-500 font-bold focus:outline-none transition-colors" id="tab-internal" onclick="switchContactTab('internal')">👤 פנימי</button>
-                <button class="px-6 py-3 text-slate-500 hover:text-teal-400 focus:outline-none transition-colors" id="tab-gov" onclick="switchContactTab('gov')">🏛️ ממשלתי</button>
+                <h2 class="text-3xl font-bold text-slate-50">אנשי קשר</h2>
+                <button onclick="openForm('contacts')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold">➕ הוספה</button>
             </div>
             <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
-        <!-- LINKS -->
-        <section id="links" class="hidden space-y-6 max-w-5xl mx-auto">
-            <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-bold text-slate-50">ספריית קישורים</h2>
-                <button onclick="openForm('links')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-500 transition-colors">➕ הוספת קישור</button>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="links-grid"></div>
-        </section>
+        </main>
 
-        <!-- CULTURE -->
-        <section id="culture" class="hidden space-y-6 max-w-5xl mx-auto">
-            <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-bold text-slate-50">תרבות הצוות</h2>
-                <button onclick="openForm('culture')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-500 transition-colors">➕ הוספת כלל</button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="culture-grid"></div>
-        </section>
-
-        <!-- AI CHAT -->
-        <section id="ai-chat" class="hidden space-y-6 max-w-4xl mx-auto h-[80vh] flex flex-col">
-            <div class="card-bg p-6 rounded-xl shadow-sm flex-1 flex flex-col overflow-hidden">
-                <div class="flex items-center gap-3 mb-4 border-b border-slate-800 pb-4">
-                    <div class="bg-teal-900/30 p-2 rounded-full text-xl">✨</div>
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-50">מסייע הקליטה האישי שלך</h2>
-                        <p class="text-xs text-slate-500">שאל אותי הכל על הארגון, נהלים ותרבות הצוות.</p>
-                    </div>
-                </div>
-                <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 p-2">
-                    <div class="bg-slate-800 p-3 rounded-lg max-w-[80%] self-start text-slate-300">
-                        <p class="text-sm">היי! אני עוזר ה-AI של הצוות. במה אוכל לעזור לך היום?</p>
-                    </div>
-                </div>
-                <div class="mt-4 flex gap-2">
-                    <input type="text" id="chat-input" placeholder="כתוב כאן שאלה..." class="flex-1 p-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 outline-none focus:ring-2 focus:ring-teal-500" onkeypress="if(event.key==='Enter') sendMessage()">
-                    <button onclick="sendMessage()" id="send-btn" class="bg-teal-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-teal-500">שלח</button>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- GENERIC MODAL -->
     <div id="modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900">
-                <h3 id="modal-title" class="text-xl font-bold text-slate-50">עריכת רשומה</h3>
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h3 id="modal-title" class="text-xl font-bold text-slate-50">עריכה</h3>
                 <button onclick="closeModal()" class="text-slate-500 hover:text-slate-300 text-2xl">&times;</button>
             </div>
-            <div id="modal-content" class="p-6 space-y-4 bg-slate-900 text-slate-300"></div>
-            <div class="p-6 bg-slate-950 flex justify-end gap-3 border-t border-slate-800">
-                <button onclick="closeModal()" class="px-4 py-2 text-slate-400 hover:text-slate-200">ביטול</button>
-                <button id="modal-save-btn" class="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold hover:bg-teal-500">שמירה</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI EXPLAINER MODAL -->
-    <div id="ai-modal" class="fixed inset-0 modal-overlay z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-teal-900/20">
-                <h3 id="ai-modal-title" class="text-xl font-bold text-teal-400 flex items-center gap-2">✨ הסבר חכם</h3>
-                <button onclick="closeAiModal()" class="text-slate-500 hover:text-slate-300 text-2xl">&times;</button>
-            </div>
-            <div id="ai-modal-content" class="p-6 overflow-y-auto space-y-4 text-slate-300 leading-relaxed bg-slate-900"></div>
-            <div class="p-6 border-t border-slate-800 flex justify-end bg-slate-950">
-                <button onclick="closeAiModal()" class="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold">הבנתי, תודה!</button>
+            <div id="modal-content" class="p-6 space-y-4 text-slate-300"></div>
+            <div class="p-6 bg-slate-950 flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 text-slate-400">ביטול</button>
+                <button id="modal-save-btn" class="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold">שמירה</button>
             </div>
         </div>
     </div>
 
     <script>
-        const apiKey = "";
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'onboarding-kit-dark';
+        // שימוש ב-var הופך את המשתנים לגלובליים באמת ונגישים ל-Firebase
+        var checklistData = [{ id: 1, text: "הגדרת שם משתמש וסיסמה", done: false }];
+        var termsData = [{ id: 1, term: "KPI", definition: "מדדי ביצוע." }];
+        var contactsData = [];
+        var linksData = [];
+        var cultureData = [];
+        var currentSection = 'home';
+        var editId = null;
+        var chartInstance = null;
 
-        // --- DATA STATE ---
-        var checklistData = [
-            { id: 1, text: "הגדרת שם משתמש וסיסמה", done: false },
-            { id: 2, text: "הצטרפות לערוצי ה-Slack", done: false },
-            { id: 3, text: "פגישת הכרות 1:1 עם המנהל", done: false }
-        ];
-
-        var termsData = [
-            { id: 1, term: "KPI", definition: "מדדי ביצוע מרכזיים לבחינת הצלחה." },
-            { id: 2, term: "ועדת היגוי", definition: "הפורום הבכיר שמקבל החלטות אסטרטגיות." }
-        ];
-
-        var contactsData = [
-            { id: 1, type: 'internal', name: "ישראל ישראלי", role: "מנהל צוות", purpose: "שאלות מקצועיות", contact: "050-0000000", icon: "👑" },
-            { id: 2, type: 'gov', name: "משרד האוצר", role: "רפרנט", purpose: "אישורי תקציב", contact: "office@mof.gov.il", icon: "💰" }
-        ];
-
-        var linksData = [
-            { id: 1, title: "פורטל הארגון", desc: "דיווח שעות וטפסים", url: "https://portal.example.com", color: "bg-slate-800/50 border-blue-500/30" },
-            { id: 2, title: "תיקיית פרויקט", desc: "מסמכים מקצועיים", url: "https://drive.google.com", color: "bg-slate-800/50 border-emerald-500/30" }
-        ];
-
-        var cultureData = [
-            { id: 1, title: "ארוחת צהריים", desc: "יוצאים יחד ב-13:00", icon: "🍔" },
-            { id: 2, title: "שקיפות", desc: "משתפים קשיים מוקדם", icon: "👐" }
-        ];
-
-        let currentSection = 'home';
-        let contactType = 'internal';
-        let editId = null;
-        let chartInstance = null;
-
-        // --- GEMINI API INTEGRATION ---
-        async function callGemini(prompt, systemInstruction = "You are a helpful onboarding assistant. Respond in Hebrew. Use dark mode aesthetic terminology if appropriate.") {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: prompt }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] }
-            };
-
-            for (let i = 0; i < 5; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error('API Error');
-                    const result = await response.json();
-                    return result.candidates?.[0]?.content?.parts?.[0]?.text;
-                } catch (e) {
-                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
-                }
-            }
-            throw new Error('שירות ה-AI לא זמין כרגע.');
-        }
-
-        // --- NAVIGATION ---
         function navigateTo(sectionId) {
             document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
-            const target = document.getElementById(sectionId);
-            if (target) target.classList.remove('hidden');
-            
+            document.getElementById(sectionId).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            const activeNav = document.getElementById(`nav-${sectionId}`);
-            if (activeNav) activeNav.classList.add('active');
-            
+            if(document.getElementById(`nav-${sectionId}`)) document.getElementById(`nav-${sectionId}`).classList.add('active');
             currentSection = sectionId;
             renderAll();
         }
@@ -330,26 +119,18 @@
             if (currentSection === 'checklist') renderChecklist();
             if (currentSection === 'dictionary') renderDictionary();
             if (currentSection === 'contacts') renderContacts();
-            if (currentSection === 'links') renderLinks();
-            if (currentSection === 'culture') renderCulture();
         }
 
-        // --- CHECKLIST ---
         function renderChecklist() {
             const container = document.getElementById('task-list-container');
             if (!container) return;
             container.innerHTML = checklistData.map(item => `
-                <div class="p-4 rounded-lg border flex items-center justify-between transition-all ${item.done ? 'bg-teal-900/20 border-teal-800' : 'bg-slate-900 border-slate-800 shadow-sm'}">
-                    <div class="flex items-center gap-4 flex-1 cursor-pointer" onclick="toggleTask(${item.id})">
-                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${item.done ? 'bg-teal-500 border-teal-500 text-slate-900' : 'border-slate-700'}">
-                            ${item.done ? '✔' : ''}
-                        </div>
-                        <span class="${item.done ? 'line-through text-slate-600' : 'font-medium text-slate-200'}">${item.text}</span>
+                <div class="p-4 rounded-lg border flex items-center justify-between bg-slate-900 border-slate-800">
+                    <div class="flex items-center gap-4 cursor-pointer" onclick="toggleTask(${item.id})">
+                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${item.done ? 'bg-teal-500' : ''}">${item.done ? '✔' : ''}</div>
+                        <span class="${item.done ? 'line-through text-slate-600' : 'text-slate-200'}">${item.text}</span>
                     </div>
-                    <div class="flex gap-3">
-                        <button onclick="openForm('checklist', ${item.id})" class="text-slate-500 hover:text-teal-400">✏️</button>
-                        <button onclick="deleteItem('checklist', ${item.id})" class="text-slate-500 hover:text-red-400">🗑️</button>
-                    </div>
+                    <button onclick="deleteItem('checklist', ${item.id})" class="text-slate-500 hover:text-red-400">🗑️</button>
                 </div>
             `).join('');
             updateChart();
@@ -362,210 +143,26 @@
         }
 
         function updateChart() {
-            const chartCanvas = document.getElementById('progressChart');
-            if (!chartCanvas) return;
+            const canvas = document.getElementById('progressChart');
+            if (!canvas) return;
             const done = checklistData.filter(x => x.done).length;
             const total = checklistData.length || 1;
             const perc = Math.round((done / total) * 100);
             document.getElementById('progress-text').innerText = `${perc}%`;
-            
             if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(chartCanvas.getContext('2d'), {
+            chartInstance = new Chart(canvas.getContext('2d'), {
                 type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [done, total - done],
-                        backgroundColor: ['#14b8a6', '#1e293b'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { cutout: '80%', maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } }
+                data: { datasets: [{ data: [done, total - done], backgroundColor: ['#14b8a6', '#1e293b'], borderWidth: 0 }] },
+                options: { cutout: '80%', maintainAspectRatio: false }
             });
         }
 
-        // AI TASK MODAL
-        async function openAiTaskModal() {
-            const modal = document.getElementById('modal');
-            const content = document.getElementById('modal-content');
-            document.getElementById('modal-title').innerText = '✨ מחולל משימות AI';
-            content.innerHTML = `
-                <p class="text-sm text-slate-400 mb-2">הזן את התפקיד החדש לקבלת הצעות:</p>
-                <input type="text" id="ai-role-input" placeholder="למשל: מפתח Frontend" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-lg mb-4 text-slate-100">
-                <div id="ai-loading" class="hidden flex items-center gap-2 text-teal-400"><div class="loading-spinner"></div> מעבד...</div>
-                <div id="ai-results" class="space-y-2 max-h-48 overflow-y-auto"></div>
-            `;
-            const saveBtn = document.getElementById('modal-save-btn');
-            saveBtn.innerText = 'צור הצעות';
-            saveBtn.onclick = async () => {
-                const role = document.getElementById('ai-role-input').value;
-                if(!role) return;
-                const loading = document.getElementById('ai-loading');
-                const results = document.getElementById('ai-results');
-                loading.classList.remove('hidden');
-                saveBtn.disabled = true;
-                try {
-                    const res = await callGemini(`הצע 5 משימות קליטה לתפקיד: ${role}. שורות בודדות ללא מספור.`);
-                    const tasks = res.split('\n').filter(t => t.trim().length > 2);
-                    results.innerHTML = tasks.map((t, idx) => `
-                        <div class="flex items-center gap-2 bg-slate-800 p-2 rounded border border-slate-700">
-                            <input type="checkbox" id="ai-t-${idx}" value="${t}" checked class="accent-teal-500">
-                            <label for="ai-t-${idx}" class="text-xs text-slate-300">${t}</label>
-                        </div>
-                    `).join('');
-                    saveBtn.innerText = 'הוסף נבחרות';
-                    saveBtn.onclick = () => {
-                        tasks.forEach((t, idx) => {
-                            if(document.getElementById(`ai-t-${idx}`).checked) checklistData.push({ id: Date.now() + idx, text: t, done: false });
-                        });
-                        closeModal();
-                        renderChecklist();
-                    };
-                } catch (e) { results.innerHTML = `<p class="text-red-400 text-xs">${e.message}</p>`; }
-                finally { loading.classList.add('hidden'); saveBtn.disabled = false; }
-            };
-            modal.classList.remove('hidden');
-        }
-
-        // --- DICTIONARY ---
-        function renderDictionary() {
-            const search = document.getElementById('search-term').value.toLowerCase();
-            const grid = document.getElementById('terms-grid');
-            if (!grid) return;
-            grid.innerHTML = termsData.filter(t => t.term.toLowerCase().includes(search) || t.definition.toLowerCase().includes(search)).map(t => `
-                <div class="card-bg p-5 rounded-xl relative group card-hover">
-                    <div class="flex justify-between items-start">
-                        <h4 class="text-teal-400 font-bold text-lg">${t.term}</h4>
-                        <button onclick="explainTerm('${t.term}')" class="text-xs bg-teal-900/30 text-teal-400 px-2 py-1 rounded-full hover:bg-teal-900/50">✨ AI</button>
-                    </div>
-                    <p class="text-slate-400 text-sm mt-1 leading-relaxed">${t.definition}</p>
-                    <div class="mt-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="openForm('dictionary', ${t.id})" class="text-xs text-slate-500 hover:text-teal-400">✏️</button>
-                        <button onclick="deleteItem('dictionary', ${t.id})" class="text-xs text-slate-500 hover:text-red-400">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function explainTerm(term) {
-            const modal = document.getElementById('ai-modal');
-            const content = document.getElementById('ai-modal-content');
-            document.getElementById('ai-modal-title').innerText = `✨ מה זה ${term}?`;
-            content.innerHTML = '<div class="flex items-center gap-3 text-teal-400"><div class="loading-spinner"></div> מנתח נתונים...</div>';
-            modal.classList.remove('hidden');
-            try {
-                const res = await callGemini(`הסבר לעובד חדש את המושג "${term}" בפירוט. השתמש במבנה Markdown.`);
-                content.innerHTML = formatMarkdown(res);
-            } catch (e) { content.innerHTML = `<p class="text-red-400">${e.message}</p>`; }
-        }
-
-        // --- CONTACTS ---
-        function renderContacts() {
-            const grid = document.getElementById('contacts-grid');
-            if (!grid) return;
-            grid.innerHTML = contactsData.filter(c => c.type === contactType).map(c => `
-                <div class="card-bg p-6 rounded-xl text-center relative group card-hover">
-                    <div class="text-4xl mb-3">${c.icon}</div>
-                    <h3 class="font-bold text-slate-100 text-lg">${c.name}</h3>
-                    <div class="text-xs text-teal-400 font-bold mb-2 uppercase tracking-wider">${c.role}</div>
-                    <p class="text-xs text-slate-500 mb-4 h-8">${c.purpose}</p>
-                    <div class="text-sm font-medium text-slate-300 bg-slate-800 py-2 rounded-lg">${c.contact}</div>
-                    <div class="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="openForm('contacts', ${c.id})" class="text-slate-500 hover:text-teal-400">✏️</button>
-                        <button onclick="deleteItem('contacts', ${c.id})" class="text-slate-500 hover:text-red-400">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // --- LINKS ---
-        function renderLinks() {
-            const grid = document.getElementById('links-grid');
-            if (!grid) return;
-            grid.innerHTML = linksData.map(l => `
-                <div class="${l.color} p-6 rounded-xl border-r-4 relative group cursor-pointer hover:bg-slate-800/80 transition-all border-slate-700/50" onclick="if('${l.url}') window.open('${l.url}', '_blank')">
-                    <h3 class="font-bold text-slate-100 text-lg">${l.title} ↗</h3>
-                    <p class="text-slate-400 text-xs mt-2 leading-relaxed">${l.desc}</p>
-                    <div class="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="event.stopPropagation(); openForm('links', ${l.id})" class="p-1 hover:bg-slate-700 rounded">✏️</button>
-                        <button onclick="event.stopPropagation(); deleteItem('links', ${l.id})" class="p-1 hover:bg-slate-700 rounded">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // --- CULTURE ---
-        function renderCulture() {
-            const grid = document.getElementById('culture-grid');
-            if (!grid) return;
-            grid.innerHTML = cultureData.map(c => `
-                <div class="flex items-start gap-4 p-5 card-bg rounded-xl relative group card-hover">
-                    <div class="bg-teal-900/20 p-3 rounded-xl text-3xl shadow-inner">${c.icon}</div>
-                    <div class="flex-1">
-                        <h3 class="font-bold text-slate-100 text-lg">${c.title}</h3>
-                        <p class="text-slate-500 text-sm mt-1 leading-relaxed">${c.desc}</p>
-                    </div>
-                    <div class="absolute top-4 left-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="openForm('culture', ${c.id})" class="text-slate-500 hover:text-teal-400">✏️</button>
-                        <button onclick="deleteItem('culture', ${c.id})" class="text-slate-500 hover:text-red-400">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // --- AI CHAT ---
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const msg = input.value.trim();
-            if(!msg) return;
-            const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML += `<div class="bg-teal-600 text-slate-950 p-3 rounded-2xl rounded-tr-none max-w-[85%] self-end mr-auto font-medium"><p class="text-sm">${msg}</p></div>`;
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-            const lid = 'ai-load-' + Date.now();
-            chatBox.innerHTML += `<div id="${lid}" class="bg-slate-800 p-3 rounded-2xl rounded-tl-none max-w-[85%] self-start flex gap-2"><div class="loading-spinner"></div></div>`;
-            try {
-                const ctx = `Context: Our onboarding kit includes terms like: ${termsData.map(t=>t.term).join(', ')}. Rules: ${cultureData.map(c=>c.title).join(', ')}.`;
-                const res = await callGemini(`${ctx}\n\nUser Question: ${msg}`);
-                document.getElementById(lid).innerHTML = `<p class="text-sm text-slate-200">${res}</p>`;
-            } catch (e) { document.getElementById(lid).innerHTML = `<p class="text-xs text-red-400">שגיאה: ${e.message}</p>`; }
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        // --- MODAL & FORMS ---
         function openForm(section, id = null) {
             editId = id;
             const modal = document.getElementById('modal');
             const content = document.getElementById('modal-content');
-            const title = document.getElementById('modal-title');
-            title.innerText = id ? 'עריכת רשומה' : 'הוספת רשומה';
-            const arr = getDataArray(section);
-            const data = id ? arr.find(x => x.id === id) : {};
-            
-            const inputClass = "w-full p-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:ring-2 focus:ring-teal-500 outline-none transition-all";
-            
-            if (section === 'checklist') content.innerHTML = `<input type="text" id="f-text" placeholder="תיאור המשימה" class="${inputClass}" value="${data.text || ''}">`;
-            else if (section === 'dictionary') content.innerHTML = `<input type="text" id="f-term" placeholder="מונח" class="${inputClass}" value="${data.term || ''}"><textarea id="f-def" placeholder="הגדרה" class="${inputClass} h-24">${data.definition || ''}</textarea>`;
-            else if (section === 'contacts') content.innerHTML = `
-                <select id="f-type" class="${inputClass}"><option value="internal" ${data.type==='internal'?'selected':''}>פנימי</option><option value="gov" ${data.type==='gov'?'selected':''}>ממשלתי</option></select>
-                <input type="text" id="f-name" placeholder="שם" class="${inputClass}" value="${data.name || ''}">
-                <input type="text" id="f-role" placeholder="תפקיד" class="${inputClass}" value="${data.role || ''}">
-                <input type="text" id="f-purpose" placeholder="מטרה" class="${inputClass}" value="${data.purpose || ''}">
-                <input type="text" id="f-contact" placeholder="פרטי קשר" class="${inputClass}" value="${data.contact || ''}">
-                <input type="text" id="f-icon" placeholder="אייקון (Emoji)" class="${inputClass}" value="${data.icon || '👤'}">`;
-            else if (section === 'links') content.innerHTML = `
-                <input type="text" id="f-title" placeholder="כותרת" class="${inputClass}" value="${data.title || ''}">
-                <input type="text" id="f-desc" placeholder="תיאור" class="${inputClass}" value="${data.desc || ''}">
-                <input type="text" id="f-url" placeholder="URL" class="${inputClass}" value="${data.url || ''}">
-                <select id="f-color" class="${inputClass}">
-                    <option value="bg-slate-800 border-blue-500/30" ${data.color?.includes('blue')?'selected':''}>כחול</option>
-                    <option value="bg-slate-800 border-emerald-500/30" ${data.color?.includes('emerald')?'selected':''}>ירוק</option>
-                    <option value="bg-slate-800 border-purple-500/30" ${data.color?.includes('purple')?'selected':''}>סגול</option>
-                </select>`;
-            else if (section === 'culture') content.innerHTML = `
-                <input type="text" id="f-title" placeholder="כותרת" class="${inputClass}" value="${data.title || ''}">
-                <input type="text" id="f-desc" placeholder="תיאור" class="${inputClass}" value="${data.desc || ''}">
-                <input type="text" id="f-icon" placeholder="אייקון (Emoji)" class="${inputClass}" value="${data.icon || '💡'}">`;
-            
+            const data = id ? getDataArray(section).find(x => x.id === id) : {};
+            if (section === 'checklist') content.innerHTML = `<input type="text" id="f-text" class="w-full p-3 bg-slate-800 rounded border border-slate-700" value="${data.text || ''}">`;
             document.getElementById('modal-save-btn').onclick = () => saveForm(section);
             modal.classList.remove('hidden');
         }
@@ -574,111 +171,66 @@
             let arr = getDataArray(section);
             let newItem = { id: editId || Date.now() };
             if (section === 'checklist') newItem.text = document.getElementById('f-text').value;
-            if (section === 'dictionary') { newItem.term = document.getElementById('f-term').value; newItem.definition = document.getElementById('f-def').value; }
-            if (section === 'contacts') { newItem.type = document.getElementById('f-type').value; newItem.name = document.getElementById('f-name').value; newItem.role = document.getElementById('f-role').value; newItem.purpose = document.getElementById('f-purpose').value; newItem.contact = document.getElementById('f-contact').value; newItem.icon = document.getElementById('f-icon').value; }
-            if (section === 'links') { newItem.title = document.getElementById('f-title').value; newItem.desc = document.getElementById('f-desc').value; newItem.url = document.getElementById('f-url').value; newItem.color = document.getElementById('f-color').value; }
-            if (section === 'culture') { newItem.title = document.getElementById('f-title').value; newItem.desc = document.getElementById('f-desc').value; newItem.icon = document.getElementById('f-icon').value; }
-
             if (editId) arr[arr.findIndex(x => x.id === editId)] = { ...newItem };
-            else { if (section === 'checklist') newItem.done = false; arr.push(newItem); }
+            else arr.push({ ...newItem, done: false });
             closeModal(); renderAll();
         }
 
         function deleteItemLogic(section, id) {
-            if (!confirm('למחוק רשומה זו?')) return;
             if (section === 'checklist') checklistData = checklistData.filter(x => x.id !== id);
-            else if (section === 'dictionary') termsData = termsData.filter(x => x.id !== id);
-            else if (section === 'contacts') contactsData = contactsData.filter(x => x.id !== id);
-            else if (section === 'links') linksData = linksData.filter(x => x.id !== id);
-            else if (section === 'culture') cultureData = cultureData.filter(x => x.id !== id);
             renderAll();
         }
 
-        function getDataArray(s) {
-            if (s === 'checklist') return checklistData;
-            if (s === 'dictionary') return termsData;
-            if (s === 'contacts') return contactsData;
-            if (s === 'links') return linksData;
-            if (s === 'culture') return cultureData;
-            return [];
-        }
-
+        function getDataArray(s) { return (s === 'checklist') ? checklistData : (s === 'dictionary') ? termsData : contactsData; }
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
-        function closeAiModal() { document.getElementById('ai-modal').classList.add('hidden'); }
-        function formatMarkdown(text) { return text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-teal-400">$1</strong>').replace(/\n/g, '<br>'); }
-        function switchContactTab(type) { 
-            contactType = type; 
-            document.getElementById('tab-internal').className = type === 'internal' ? 'px-6 py-3 text-teal-400 border-b-2 border-teal-500 font-bold focus:outline-none transition-colors' : 'px-6 py-3 text-slate-500 hover:text-teal-400 focus:outline-none transition-colors';
-            document.getElementById('tab-gov').className = type === 'gov' ? 'px-6 py-3 text-teal-400 border-b-2 border-teal-500 font-bold focus:outline-none transition-colors' : 'px-6 py-3 text-slate-500 hover:text-teal-400 focus:outline-none transition-colors';
-            renderContacts(); 
-        }
-
         window.onload = () => navigateTo('home');
     </script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-  console.log("🚀 סקריפט ה-Firebase התחיל לעבוד!");
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDHMgzo-yQ_UGkAXdBPzkJjB7uCGG9_nBs",
-    authDomain: "onboarding-kit-60190.firebaseapp.com",
-    projectId: "onboarding-kit-60190",
-    storageBucket: "onboarding-kit-60190.firebasestorage.app",
-    messagingSenderId: "515390708221",
-    appId: "1:515390708221:web:a828f2289fe2cfe9602194"
-  };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHMgzo-yQ_UGkAXdBPzkJjB7uCGG9_nBs",
+            authDomain: "onboarding-kit-60190.firebaseapp.com",
+            projectId: "onboarding-kit-60190",
+            storageBucket: "onboarding-kit-60190.firebasestorage.app",
+            messagingSenderId: "515390708221",
+            appId: "1:515390708221:web:a828f2289fe2cfe9602194"
+        };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-  async function syncToFirebase() {
-    try {
-      console.log("🔄 מנסה לסנכרן לענן...");
-      await setDoc(doc(db, "appData", "currentStatus"), {
-        checklist: checklistData,
-        terms: termsData,
-        contacts: contactsData,
-        links: linksData,
-        culture: cultureData,
-        lastUpdated: new Date()
-      });
-      console.log("✅ סונכרן ל-Firebase בהצלחה!");
-    } catch (e) {
-      console.error("❌ שגיאת סנכרון:", e);
-    }
-  }
+        async function syncToFirebase() {
+            try {
+                await setDoc(doc(db, "appData", "currentStatus"), {
+                    checklist: checklistData,
+                    terms: termsData,
+                    lastUpdated: new Date()
+                });
+                console.log("✅ סונכרן ל-Firebase!");
+            } catch (e) { console.error("❌ שגיאה בסנכרון:", e); }
+        }
 
-  async function loadFromFirebase() {
-    try {
-      console.log("📡 בודק נתונים בענן...");
-      const docSnap = await getDoc(doc(db, "appData", "currentStatus"));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.checklist) checklistData = data.checklist;
-        if (data.terms) termsData = data.terms;
-        if (data.contacts) contactsData = data.contacts;
-        if (data.links) linksData = data.links;
-        if (data.culture) cultureData = data.culture;
-        renderAll();
-        console.log("📥 הנתונים נטענו בהצלחה מהענן!");
-      } else {
-        console.log("ℹ️ הענן ריק כרגע. בצע שמירה ראשונה כדי ליצור את ה-Collection.");
-      }
-    } catch (e) {
-      console.error("❌ שגיאה בטעינה:", e);
-    }
-  }
+        async function loadFromFirebase() {
+            try {
+                const docSnap = await getDoc(doc(db, "appData", "currentStatus"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.checklist) checklistData = data.checklist;
+                    if (data.terms) termsData = data.terms;
+                    renderAll();
+                    console.log("📥 נטען מהענן!");
+                }
+            } catch (e) { console.error("❌ שגיאה בטעינה:", e); }
+        }
 
-  window.saveForm = (section) => { saveFormLogic(section); syncToFirebase(); };
-  window.deleteItem = (section, id) => { deleteItemLogic(section, id); syncToFirebase(); };
-  window.toggleTask = (id) => { toggleTaskLogic(id); syncToFirebase(); };
+        window.saveForm = (s) => { saveFormLogic(s); syncToFirebase(); };
+        window.deleteItem = (s, i) => { deleteItemLogic(s, i); syncToFirebase(); };
+        window.toggleTask = (i) => { toggleTaskLogic(i); syncToFirebase(); };
 
-  window.addEventListener('load', loadFromFirebase);
-</script>
+        window.addEventListener('load', loadFromFirebase);
+    </script>
 </body>
 </html>
-
-
-
