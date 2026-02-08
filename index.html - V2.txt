@@ -256,28 +256,28 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'onboarding-kit-dark';
 
         // --- DATA STATE ---
-        let checklistData = [
+        var checklistData = [
             { id: 1, text: "הגדרת שם משתמש וסיסמה", done: false },
             { id: 2, text: "הצטרפות לערוצי ה-Slack", done: false },
             { id: 3, text: "פגישת הכרות 1:1 עם המנהל", done: false }
         ];
 
-        let termsData = [
+        var termsData = [
             { id: 1, term: "KPI", definition: "מדדי ביצוע מרכזיים לבחינת הצלחה." },
             { id: 2, term: "ועדת היגוי", definition: "הפורום הבכיר שמקבל החלטות אסטרטגיות." }
         ];
 
-        let contactsData = [
+        var contactsData = [
             { id: 1, type: 'internal', name: "ישראל ישראלי", role: "מנהל צוות", purpose: "שאלות מקצועיות", contact: "050-0000000", icon: "👑" },
             { id: 2, type: 'gov', name: "משרד האוצר", role: "רפרנט", purpose: "אישורי תקציב", contact: "office@mof.gov.il", icon: "💰" }
         ];
 
-        let linksData = [
+        var linksData = [
             { id: 1, title: "פורטל הארגון", desc: "דיווח שעות וטפסים", url: "https://portal.example.com", color: "bg-slate-800/50 border-blue-500/30" },
             { id: 2, title: "תיקיית פרויקט", desc: "מסמכים מקצועיים", url: "https://drive.google.com", color: "bg-slate-800/50 border-emerald-500/30" }
         ];
 
-        let cultureData = [
+        var cultureData = [
             { id: 1, title: "ארוחת צהריים", desc: "יוצאים יחד ב-13:00", icon: "🍔" },
             { id: 2, title: "שקיפות", desc: "משתפים קשיים מוקדם", icon: "👐" }
         ];
@@ -616,11 +616,11 @@
         window.onload = () => navigateTo('home');
     </script>
 <script type="module">
-  // 1. ייבוא ספריות בגרסה אחידה (10.7.0)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-  // 2. הגדרות Firebase נקיות (בלי ה-import שהיה בפנים בטעות)
+  console.log("🚀 סקריפט ה-Firebase התחיל לעבוד!");
+
   const firebaseConfig = {
     apiKey: "AIzaSyDHMgzo-yQ_UGkAXdBPzkJjB7uCGG9_nBs",
     authDomain: "onboarding-kit-60190.firebaseapp.com",
@@ -630,13 +630,12 @@
     appId: "1:515390708221:web:a828f2289fe2cfe9602194"
   };
 
-  // 3. אתחול
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 4. פונקציית סנכרון (שומרת את כל המערכים שלך לענן)
   async function syncToFirebase() {
     try {
+      console.log("🔄 מנסה לסנכרן לענן...");
       await setDoc(doc(db, "appData", "currentStatus"), {
         checklist: checklistData,
         terms: termsData,
@@ -645,53 +644,41 @@
         culture: cultureData,
         lastUpdated: new Date()
       });
-      console.log("סונכרן ל-Firebase בהצלחה!");
+      console.log("✅ סונכרן ל-Firebase בהצלחה!");
     } catch (e) {
-      console.error("שגיאת סנכרון:", e);
+      console.error("❌ שגיאת סנכרון:", e);
     }
   }
 
-  // 5. פונקציית טעינה (מושכת את הכל בבת אחת כשהדף עולה)
   async function loadFromFirebase() {
     try {
+      console.log("📡 בודק נתונים בענן...");
       const docSnap = await getDoc(doc(db, "appData", "currentStatus"));
       if (docSnap.exists()) {
         const data = docSnap.data();
-        // מעדכן את המשתנים שהגדרת ב-Script הראשון [cite: 61-66]
         if (data.checklist) checklistData = data.checklist;
         if (data.terms) termsData = data.terms;
         if (data.contacts) contactsData = data.contacts;
         if (data.links) linksData = data.links;
         if (data.culture) cultureData = data.culture;
-        
-        renderAll(); // מרענן את התצוגה [cite: 78]
-        console.log("הנתונים נטענו מהענן!");
+        renderAll();
+        console.log("📥 הנתונים נטענו בהצלחה מהענן!");
+      } else {
+        console.log("ℹ️ הענן ריק כרגע. בצע שמירה ראשונה כדי ליצור את ה-Collection.");
       }
     } catch (e) {
-      console.error("שגיאה בטעינה:", e);
+      console.error("❌ שגיאה בטעינה:", e);
     }
   }
 
-  // 6. חיבור הפונקציות ששינית ל-Logic [שינויים בשורות 85, 144, 154]
-  window.saveForm = (section) => {
-    saveFormLogic(section); 
-    syncToFirebase();
-  };
+  window.saveForm = (section) => { saveFormLogic(section); syncToFirebase(); };
+  window.deleteItem = (section, id) => { deleteItemLogic(section, id); syncToFirebase(); };
+  window.toggleTask = (id) => { toggleTaskLogic(id); syncToFirebase(); };
 
-  window.deleteItem = (section, id) => {
-    deleteItemLogic(section, id);
-    syncToFirebase();
-  };
-
-  window.toggleTask = (id) => {
-    toggleTaskLogic(id);
-    syncToFirebase();
-  };
-
-  // הפעלה בטעינת הדף
   window.addEventListener('load', loadFromFirebase);
 </script>
 </body>
 </html>
+
 
 
