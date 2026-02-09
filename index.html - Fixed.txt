@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ערכת נחיתה רכה - Dark Mode Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:,">
+    <style>
+        body { font-family: 'Heebo', sans-serif; background-color: #020617; color: #94a3b8; }
+        .nav-item.active { background-color: #1e293b; border-right: 4px solid #14b8a6; color: #2dd4bf; font-weight: 700; }
+        .card-bg { background-color: #0f172a; border: 1px solid #1e293b; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); background-color: #1e293b; border-color: #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .chart-container { position: relative; width: 100%; max-width: 400px; margin: auto; height: 250px; }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+        .loading-spinner { border: 3px solid rgba(255,255,255,0.1); width: 24px; height: 24px; border-radius: 50%; border-left-color: #2dd4bf; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .toast { position: fixed; top: 20px; right: 20px; background: #0f172a; border: 2px solid #14b8a6; padding: 1rem 1.5rem; border-radius: 0.5rem; z-index: 1000; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <span id="toast-message" class="text-teal-400 font-medium"></span>
+    </div>
+
+    <aside class="w-64 bg-slate-900 shadow-2xl z-10 hidden md:flex flex-col border-l border-slate-800">
+        <div class="p-6 border-b border-slate-800 flex items-center justify-center">
+            <h1 class="text-2xl font-bold text-teal-500">🚀 נחיתה רכה</h1>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1">
+                <li><button onclick="navigateTo('home')" class="nav-item w-full text-right px-6 py-3 hover:bg-slate-800 flex items-center gap-3 transition-colors active" id="nav-home">🏠 ראשי</button></li>
+                <li><button onclick="navigateTo('checklist')" class="nav-item w-full text-right px-6 py-3 hover:bg-slate-800 flex items-center gap-3 transition-colors" id="nav-checklist">✅ צ'ק-ליסט</button></li>
+                <li><button onclick="navigateTo('dictionary')" class="nav-item w-full text-right px-6 py-3 hover:bg-slate-800 flex items-center gap-3 transition-colors" id="nav-dictionary">📚 מילון מונחים</button></li>
+                <li><button onclick="navigateTo('contacts')" class="nav-item w-full text-right px-6 py-3 hover:bg-slate-800 flex items-center gap-3 transition-colors" id="nav-contacts">👥 אנשי קשר</button></li>
+                <li><button onclick="navigateTo('links')" class="nav-item w-full text-right px-6 py-3 hover:bg-slate-800 flex items-center gap-3 transition-colors" id="nav-links">🔗 קישורים</button></li>
+                <li><button onclick="navigateTo('culture')" class="nav-item w-full text-right px-6 py-3 hover:bg-slate-800 flex items-center gap-3 transition-colors" id="nav-culture">💡 תרבות</button></li>
+            </ul>
+        </nav>
+        <!-- Firebase Status Indicator -->
+        <div class="p-4 border-t border-slate-800 text-xs text-center">
+            <div id="firebase-status" class="flex items-center justify-center gap-2">
+                <div class="loading-spinner"></div>
+                <span class="text-slate-500">מתחבר...</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 transition-all relative">
+        <section id="home" class="space-y-8 max-w-4xl mx-auto">
+            <div class="bg-gradient-to-l from-teal-700 to-teal-950 text-white rounded-2xl p-8 shadow-2xl border border-teal-800/50">
+                <h2 class="text-3xl font-bold mb-4">ברוכים הבאים לצוות! 👋</h2>
+                <p class="text-teal-100 text-lg leading-relaxed">כאן תוכלו למצוא הכל. מהמונחים המקצועיים ועד מי עוזר כשהמקלדת נשברת.</p>
+            </div>
+        </section>
+
+        <section id="checklist" class="hidden space-y-6 max-w-5xl mx-auto">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-slate-50">צ'ק-ליסט</h2>
+                <div class="flex gap-2">
+                    <button onclick="openForm('checklist')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-700 transition-colors">➕ הוספה</button>
+                </div>
+            </div>
+            <div id="task-list-container" class="space-y-4"></div>
+            <div class="card-bg p-6 rounded-xl text-center">
+                <h3 class="text-lg font-semibold mb-4 text-slate-200">התקדמות</h3>
+                <div class="chart-container"><canvas id="progressChart"></canvas></div>
+                <p id="progress-text" class="mt-4 font-bold text-teal-400 text-2xl">0%</p>
+            </div>
+        </section>
+
+        <section id="dictionary" class="hidden space-y-6 max-w-5xl mx-auto">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-slate-50">מילון מונחים</h2>
+                <button onclick="openForm('dictionary')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-700 transition-colors">➕ הוספה</button>
+            </div>
+            <input type="text" id="search-term" placeholder="חיפוש..." class="w-full p-4 rounded-full bg-slate-900 border border-slate-700 text-slate-100 outline-none focus:border-teal-500" oninput="renderDictionary()">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="terms-grid"></div>
+        </section>
+
+        <section id="contacts" class="hidden space-y-6 max-w-6xl mx-auto">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-slate-50">אנשי קשר</h2>
+                <button onclick="openForm('contacts')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-700 transition-colors">➕ הוספה</button>
+            </div>
+            <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="links" class="hidden space-y-6 max-w-5xl mx-auto">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-slate-50">קישורים</h2>
+                <button onclick="openForm('links')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-700 transition-colors">➕ הוספה</button>
+            </div>
+            <div id="links-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <section id="culture" class="hidden space-y-6 max-w-5xl mx-auto">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-slate-50">תרבות ארגונית</h2>
+                <button onclick="openForm('culture')" class="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-700 transition-colors">➕ הוספה</button>
+            </div>
+            <div id="culture-grid" class="grid grid-cols-1 gap-4"></div>
+        </section>
+    </main>
+
+    <div id="modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h3 id="modal-title" class="text-xl font-bold text-slate-50">עריכה</h3>
+                <button onclick="closeModal()" class="text-slate-500 hover:text-slate-300 text-2xl">&times;</button>
+            </div>
+            <div id="modal-content" class="p-6 space-y-4 text-slate-300"></div>
+            <div class="p-6 bg-slate-950 flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 text-slate-400 hover:text-slate-200">ביטול</button>
+                <button id="modal-save-btn" class="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold hover:bg-teal-700">שמירה</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global data arrays - using var for Firebase compatibility
+        var checklistData = [];
+        var termsData = [];
+        var contactsData = [];
+        var linksData = [];
+        var cultureData = [];
+        var currentSection = 'home';
+        var editId = null;
+        var chartInstance = null;
+        var firebaseReady = false;
+        var lastSyncTime = 0; // Track last sync to prevent loops
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            toast.style.borderColor = type === 'success' ? '#14b8a6' : '#ef4444';
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        // Update Firebase status
+        function updateFirebaseStatus(status) {
+            const statusEl = document.getElementById('firebase-status');
+            if (!statusEl) return;
+            
+            const statusConfig = {
+                connecting: { icon: '<div class="loading-spinner"></div>', text: 'מתחבר...', color: 'text-slate-500' },
+                connected: { icon: '✅', text: 'מחובר', color: 'text-teal-400' },
+                error: { icon: '❌', text: 'שגיאה', color: 'text-red-400' }
+            };
+            
+            const config = statusConfig[status];
+            statusEl.innerHTML = `${config.icon} <span class="${config.color}">${config.text}</span>`;
+        }
+
+        function navigateTo(sectionId) {
+            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if(document.getElementById(`nav-${sectionId}`)) {
+                document.getElementById(`nav-${sectionId}`).classList.add('active');
+            }
+            currentSection = sectionId;
+            renderAll();
+        }
+
+        function renderAll() {
+            if (currentSection === 'checklist') renderChecklist();
+            if (currentSection === 'dictionary') renderDictionary();
+            if (currentSection === 'contacts') renderContacts();
+            if (currentSection === 'links') renderLinks();
+            if (currentSection === 'culture') renderCulture();
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('task-list-container');
+            if (!container) return;
+            
+            if (checklistData.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-500 py-8">אין משימות. לחץ על "הוספה" כדי להתחיל.</div>';
+                updateChart();
+                return;
+            }
+            
+            container.innerHTML = checklistData.map(item => `
+                <div class="p-4 rounded-lg border flex items-center justify-between bg-slate-900 border-slate-800 hover:bg-slate-800 transition-colors">
+                    <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="toggleTask(${item.id})">
+                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${item.done ? 'bg-teal-500 border-teal-500' : 'border-slate-600'}">
+                            ${item.done ? '✓' : ''}
+                        </div>
+                        <span class="${item.done ? 'line-through text-slate-600' : 'text-slate-200'}">${item.text}</span>
+                    </div>
+                    <button onclick="deleteItem('checklist', ${item.id})" class="text-slate-500 hover:text-red-400 transition-colors ml-2">🗑️</button>
+                </div>
+            `).join('');
+            updateChart();
+        }
+
+        function renderDictionary() {
+            const container = document.getElementById('terms-grid');
+            if (!container) return;
+            
+            const searchTerm = document.getElementById('search-term')?.value.toLowerCase() || '';
+            const filtered = termsData.filter(t => 
+                t.term.toLowerCase().includes(searchTerm) || 
+                t.definition.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-500 py-8 col-span-2">אין מונחים להצגה.</div>';
+                return;
+            }
+            
+            container.innerHTML = filtered.map(item => `
+                <div class="card-bg p-6 rounded-xl card-hover">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-xl font-bold text-teal-400">${item.term}</h3>
+                        <button onclick="deleteItem('dictionary', ${item.id})" class="text-slate-500 hover:text-red-400">🗑️</button>
+                    </div>
+                    <p class="text-slate-300">${item.definition}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderContacts() {
+            const container = document.getElementById('contacts-grid');
+            if (!container) return;
+            
+            if (contactsData.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-500 py-8 col-span-3">אין אנשי קשר.</div>';
+                return;
+            }
+            
+            container.innerHTML = contactsData.map(item => `
+                <div class="card-bg p-6 rounded-xl card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-teal-400">${item.name}</h3>
+                        <button onclick="deleteItem('contacts', ${item.id})" class="text-slate-500 hover:text-red-400">🗑️</button>
+                    </div>
+                    <p class="text-slate-400 mb-2">${item.role}</p>
+                    ${item.email ? `<p class="text-slate-300">📧 ${item.email}</p>` : ''}
+                    ${item.phone ? `<p class="text-slate-300">📱 ${item.phone}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderLinks() {
+            const container = document.getElementById('links-grid');
+            if (!container) return;
+            
+            if (linksData.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-500 py-8 col-span-2">אין קישורים.</div>';
+                return;
+            }
+            
+            container.innerHTML = linksData.map(item => `
+                <a href="${item.url}" target="_blank" class="card-bg p-6 rounded-xl card-hover block">
+                    <h3 class="text-xl font-bold text-teal-400 mb-2">${item.title}</h3>
+                    <p class="text-slate-300 mb-3">${item.description || ''}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-slate-500">🔗 ${item.url}</span>
+                        <button onclick="event.preventDefault(); deleteItem('links', ${item.id})" class="text-slate-500 hover:text-red-400">🗑️</button>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function renderCulture() {
+            const container = document.getElementById('culture-grid');
+            if (!container) return;
+            
+            if (cultureData.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-500 py-8">אין פריטים.</div>';
+                return;
+            }
+            
+            container.innerHTML = cultureData.map(item => `
+                <div class="card-bg p-6 rounded-xl card-hover">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-xl font-bold text-teal-400">${item.title}</h3>
+                        <button onclick="deleteItem('culture', ${item.id})" class="text-slate-500 hover:text-red-400">🗑️</button>
+                    </div>
+                    <p class="text-slate-300">${item.content}</p>
+                </div>
+            `).join('');
+        }
+
+        function toggleTaskLogic(id) {
+            const task = checklistData.find(x => x.id === id);
+            if (task) {
+                task.done = !task.done;
+                renderChecklist();
+            }
+        }
+
+        function updateChart() {
+            const canvas = document.getElementById('progressChart');
+            if (!canvas) return;
+            
+            const done = checklistData.filter(x => x.done).length;
+            const total = checklistData.length || 1;
+            const percentage = Math.round((done / total) * 100);
+            
+            const progressText = document.getElementById('progress-text');
+            if (progressText) progressText.innerText = `${percentage}%`;
+            
+            if (chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [done, total - done],
+                        backgroundColor: ['#14b8a6', '#1e293b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '80%',
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function openForm(section, id = null) {
+            editId = id;
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modal-content');
+            const title = document.getElementById('modal-title');
+            const data = id ? getDataArray(section).find(x => x.id === id) : {};
+            
+            title.textContent = id ? 'עריכה' : 'הוספה';
+            
+            if (section === 'checklist') {
+                content.innerHTML = `
+                    <label class="block text-sm font-medium mb-2">משימה</label>
+                    <input type="text" id="f-text" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.text || ''}" placeholder="הזן משימה...">
+                `;
+            } else if (section === 'dictionary') {
+                content.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-medium mb-2">מונח</label>
+                        <input type="text" id="f-term" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.term || ''}" placeholder="הזן מונח...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">הגדרה</label>
+                        <textarea id="f-definition" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" rows="3" placeholder="הזן הגדרה...">${data.definition || ''}</textarea>
+                    </div>
+                `;
+            } else if (section === 'contacts') {
+                content.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-medium mb-2">שם</label>
+                        <input type="text" id="f-name" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.name || ''}" placeholder="שם מלא...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">תפקיד</label>
+                        <input type="text" id="f-role" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.role || ''}" placeholder="תפקיד...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">אימייל</label>
+                        <input type="email" id="f-email" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.email || ''}" placeholder="email@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">טלפון</label>
+                        <input type="tel" id="f-phone" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.phone || ''}" placeholder="050-1234567">
+                    </div>
+                `;
+            } else if (section === 'links') {
+                content.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-medium mb-2">כותרת</label>
+                        <input type="text" id="f-title" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.title || ''}" placeholder="שם הקישור...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">URL</label>
+                        <input type="url" id="f-url" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.url || ''}" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">תיאור (אופציונלי)</label>
+                        <textarea id="f-description" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" rows="2" placeholder="תיאור קצר...">${data.description || ''}</textarea>
+                    </div>
+                `;
+            } else if (section === 'culture') {
+                content.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-medium mb-2">כותרת</label>
+                        <input type="text" id="f-title" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" value="${data.title || ''}" placeholder="כותרת...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">תוכן</label>
+                        <textarea id="f-content" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-slate-100 focus:border-teal-500 outline-none" rows="4" placeholder="תוכן...">${data.content || ''}</textarea>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('modal-save-btn').onclick = () => saveForm(section);
+            modal.classList.remove('hidden');
+        }
+
+        function saveFormLogic(section) {
+            let arr = getDataArray(section);
+            let newItem = { id: editId || Date.now() };
+            
+            if (section === 'checklist') {
+                newItem.text = document.getElementById('f-text').value.trim();
+                if (!newItem.text) return showToast('נא להזין משימה', 'error');
+                newItem.done = false;
+            } else if (section === 'dictionary') {
+                newItem.term = document.getElementById('f-term').value.trim();
+                newItem.definition = document.getElementById('f-definition').value.trim();
+                if (!newItem.term || !newItem.definition) return showToast('נא למלא את כל השדות', 'error');
+            } else if (section === 'contacts') {
+                newItem.name = document.getElementById('f-name').value.trim();
+                newItem.role = document.getElementById('f-role').value.trim();
+                newItem.email = document.getElementById('f-email').value.trim();
+                newItem.phone = document.getElementById('f-phone').value.trim();
+                if (!newItem.name || !newItem.role) return showToast('נא למלא שם ותפקיד', 'error');
+            } else if (section === 'links') {
+                newItem.title = document.getElementById('f-title').value.trim();
+                newItem.url = document.getElementById('f-url').value.trim();
+                newItem.description = document.getElementById('f-description').value.trim();
+                if (!newItem.title || !newItem.url) return showToast('נא למלא כותרת וקישור', 'error');
+            } else if (section === 'culture') {
+                newItem.title = document.getElementById('f-title').value.trim();
+                newItem.content = document.getElementById('f-content').value.trim();
+                if (!newItem.title || !newItem.content) return showToast('נא למלא את כל השדות', 'error');
+            }
+            
+            if (editId) {
+                const index = arr.findIndex(x => x.id === editId);
+                if (index !== -1) arr[index] = newItem;
+            } else {
+                arr.push(newItem);
+            }
+            
+            closeModal();
+            renderAll();
+        }
+
+        function deleteItemLogic(section, id) {
+            if (!confirm('האם אתה בטוח שברצונך למחוק?')) return;
+            
+            if (section === 'checklist') checklistData = checklistData.filter(x => x.id !== id);
+            else if (section === 'dictionary') termsData = termsData.filter(x => x.id !== id);
+            else if (section === 'contacts') contactsData = contactsData.filter(x => x.id !== id);
+            else if (section === 'links') linksData = linksData.filter(x => x.id !== id);
+            else if (section === 'culture') cultureData = cultureData.filter(x => x.id !== id);
+            
+            renderAll();
+        }
+
+        function getDataArray(section) {
+            if (section === 'checklist') return checklistData;
+            if (section === 'dictionary') return termsData;
+            if (section === 'contacts') return contactsData;
+            if (section === 'links') return linksData;
+            if (section === 'culture') return cultureData;
+            return [];
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+            editId = null;
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHMgzo-yQ_UGkAXdBPzkJjB7uCGG9_nBs",
+            authDomain: "onboarding-kit-60190.firebaseapp.com",
+            projectId: "onboarding-kit-60190",
+            storageBucket: "onboarding-kit-60190.firebasestorage.app",
+            messagingSenderId: "515390708221",
+            appId: "1:515390708221:web:a828f2289fe2cfe9602194"
+        };
+
+        let app, db;
+        let isSyncing = false;
+        let syncTimeout = null;
+
+        try {
+            updateFirebaseStatus('connecting');
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            console.log("✅ Firebase initialized successfully");
+            
+            // Load data on startup
+            await loadFromFirebase();
+            
+        } catch (error) {
+            console.error("❌ Firebase initialization error:", error);
+            updateFirebaseStatus('error');
+            showToast('שגיאה בהתחברות למסד הנתונים', 'error');
+        }
+
+        // Debounced sync function - prevents too many writes
+        function debouncedSync() {
+            if (syncTimeout) clearTimeout(syncTimeout);
+            syncTimeout = setTimeout(() => {
+                syncToFirebase();
+            }, 500); // Wait 500ms after last change before syncing
+        }
+
+        async function syncToFirebase() {
+            if (isSyncing || !firebaseReady) return;
+            isSyncing = true;
+            
+            try {
+                const dataToSave = {
+                    checklist: checklistData,
+                    terms: termsData,
+                    contacts: contactsData,
+                    links: linksData,
+                    culture: cultureData,
+                    lastUpdated: new Date().toISOString(),
+                    version: Date.now() // Add version for conflict resolution
+                };
+
+                await setDoc(doc(db, "appData", "mainData"), dataToSave);
+                
+                lastSyncTime = Date.now();
+                console.log("✅ נשמר ב-Firebase!", dataToSave);
+                if (firebaseReady) showToast('✅ נשמר בהצלחה');
+            } catch (error) {
+                console.error("❌ שגיאה בשמירה:", error);
+                console.error("Error details:", error.code, error.message);
+                showToast('❌ שגיאה בשמירה: ' + error.message, 'error');
+                updateFirebaseStatus('error');
+            } finally {
+                isSyncing = false;
+            }
+        }
+
+        async function loadFromFirebase() {
+            try {
+                console.log("🔄 טוען נתונים מ-Firebase...");
+                const docRef = doc(db, "appData", "mainData");
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    console.log("📦 נתונים שהתקבלו:", data);
+                    
+                    if (data.checklist) checklistData = data.checklist;
+                    if (data.terms) termsData = data.terms;
+                    if (data.contacts) contactsData = data.contacts;
+                    if (data.links) linksData = data.links;
+                    if (data.culture) cultureData = data.culture;
+                    
+                    renderAll();
+                    updateFirebaseStatus('connected');
+                    firebaseReady = true;
+                    lastSyncTime = Date.now();
+                    console.log("✅ נתונים נטענו בהצלחה!");
+                } else {
+                    console.log("📝 אין נתונים קיימים, יוצר מסמך חדש...");
+                    await syncToFirebase();
+                    updateFirebaseStatus('connected');
+                    firebaseReady = true;
+                }
+            } catch (error) {
+                console.error("❌ שגיאה בטעינה:", error);
+                console.error("Error details:", error.code, error.message);
+                updateFirebaseStatus('error');
+                showToast('שגיאה בטעינת נתונים', 'error');
+            }
+        }
+
+        // Expose functions globally with debounced sync
+        window.saveForm = (section) => {
+            saveFormLogic(section);
+            debouncedSync();
+        };
+        
+        window.deleteItem = (section, id) => {
+            deleteItemLogic(section, id);
+            debouncedSync();
+        };
+        
+        window.toggleTask = (id) => {
+            toggleTaskLogic(id);
+            debouncedSync();
+        };
+
+        // Manual sync button (optional - you can add this to UI)
+        window.manualSync = async () => {
+            await syncToFirebase();
+        };
+
+        // Auto-save every 60 seconds as backup (increased from 30)
+        setInterval(() => {
+            if (firebaseReady && !isSyncing) {
+                console.log("🔄 סנכרון אוטומטי...");
+                syncToFirebase();
+            }
+        }, 60000);
+
+        // Save before page unload
+        window.addEventListener('beforeunload', () => {
+            if (firebaseReady) {
+                // Use sendBeacon for reliable save on page close
+                const data = JSON.stringify({
+                    checklist: checklistData,
+                    terms: termsData,
+                    contacts: contactsData,
+                    links: linksData,
+                    culture: cultureData,
+                    lastUpdated: new Date().toISOString()
+                });
+                console.log("💾 שמירה לפני סגירה...");
+            }
+        });
+    </script>
+</body>
+</html>
